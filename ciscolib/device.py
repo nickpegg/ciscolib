@@ -136,6 +136,9 @@ class Device(object):
         ret_text = ""
         for a in text.split('\n')[:-1]:
             ret_text += a + "\n"
+            
+        if "Invalid input" in ret_text or "Incomplete command" in ret_text:
+            raise InvalidCommand(cmd_text)
         
         return ret_text
         

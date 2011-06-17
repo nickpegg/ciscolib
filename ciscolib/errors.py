@@ -13,3 +13,18 @@ class CiscoError(Exception):
         
 class AuthenticationError(CiscoError):
     pass
+    
+class AuthorizationError(CiscoError):
+    def __init__(self, cmd):
+        self.cmd = cmd
+        
+    def __str__(self):
+        return repr("Authorization error on command: " + str(self.cmd))
+    
+class InvalidCommand(CiscoError):
+    def __init__(self, cmd):
+        self.cmd = cmd
+
+    def __str__(self):
+        ret = "Invalid command: " + str(self.cmd)
+        return repr(ret)

@@ -32,6 +32,8 @@ class TestCiscoDevice(unittest.TestCase):
         try:
             self.tearDown()
             self.setUp()
+        except:
+            pass
             
 class TestAuthenticatedCiscoDevice(TestCiscoDevice):
     def setUp(self):
