@@ -9,7 +9,7 @@ class CiscoError(Exception):
         if self.text is None or self.text == '':
             ret += "\nText returned from switch: " + str(self.text)
 
-        return repr(ret)
+        return ret
         
 class AuthenticationError(CiscoError):
     pass
@@ -19,7 +19,7 @@ class AuthorizationError(CiscoError):
         self.cmd = cmd
         
     def __str__(self):
-        return repr("Authorization error on command: " + str(self.cmd))
+        return "Authorization error on command: " + str(self.cmd)
     
 class InvalidCommand(CiscoError):
     def __init__(self, cmd):
@@ -27,4 +27,5 @@ class InvalidCommand(CiscoError):
 
     def __str__(self):
         ret = "Invalid command: " + str(self.cmd)
-        return repr(ret)
+        return ret
+

@@ -2,12 +2,12 @@ import telnetlib
 import re
 import time
 
-from errors import CiscoError, AuthenticationError
+from errors import *
 
 class Device(object):
     """ Connects to a Cisco device through telnet """
     
-    def __init__(self, host=None, password=None, enable_password=None, username=None):
+    def __init__(self, host=None, password=None, username=None, enable_password=None):
         self.host = host
         self.username = username
         self.password = password
@@ -143,7 +143,7 @@ class Device(object):
         return ret_text
         
     def get_neighbors(self):
-        """ Returns a list of tuples of the switch's neighbors: 
+        """ Returns a list of dicts of the switch's neighbors: 
             (hostname, ip, local_port, remote_port) """
         
         re_text = "-+\r?\nDevice ID: (.+)\\b\r?\n.+\s+\r?\n\s*IP address:\s+(\d+\.\d+\.\d+\.\d+)\s*\r?\n.*\r?\nInterface: (.+),.+Port ID.+:(.+)\\b\r?\n"
@@ -157,3 +157,21 @@ class Device(object):
             neighbors.append(n_dict)
         
         return neighbors
+        
+    def get_model(self):
+        """ Gets the model number of the switch using the `get version` command """
+        
+        re_text = '(?:cisco (.+?) \(.+\) processor)|(?:Model number\s*:\s+(.+))'
+        
+        match = re.search(re_text, self.cmd('show version'))
+        
+        if match is not None:
+            version = match.group(1)
+        else:
+            version = None  # TODO: Handle this more gracefully. 
+            # Maybe we should tell user that this switch isn't supported and 
+            # to contact the ciscolib developer...
+        
+        return version
+        
+        
