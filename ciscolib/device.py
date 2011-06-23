@@ -142,6 +142,7 @@ class Device(object):
         
         return ret_text
         
+   
     def get_neighbors(self):
         """ Returns a list of dicts of the switch's neighbors: 
             (hostname, ip, local_port, remote_port) """
@@ -158,9 +159,11 @@ class Device(object):
         
         return neighbors
         
+   
     def get_model(self):
         """ Gets the model number of the switch using the `get version` command """
         
+        # The RE string is a property for testing purposes
         get_model.re_text = '(?:cisco (.+?) \(.+\) processor)|(?:Model number\s*:\s+(.+))'
         
         match = re.search(get_model.re_text, self.cmd('show version'))
@@ -174,4 +177,41 @@ class Device(object):
         
         return version
         
+    
+    def get_interface(self, interface):
+        """ 
+        Gets information on one interface and returns it as a dict.
+        Input interface name must be in a form that Cisco likes
+        
+        Returned fields: name, description, status, vlan, duplex, speed, media
+        """
+        pass
+        
+   
+    def get_interfaces(self):
+        detail_re = "((?:\w+|-|/!)+\d+(?:/\d+)?) is (?:up|down).+? \((.+)\)\r?\n(?:.+\r?\n)(?:\s+Description: (.+)\r?\n)?"
+        
+        status_re = "(\w{2}\d+/\d+)\s+(?:.+)?\s+(\w+)\s+(\d+|trunk)\s+((?:\d|\w|-)+)\s+((?:\d|\w|-)+)\s+(.+)"
+        
+        ports = []
+        
+        port_matches = re.findall(detail_re, self.cmd('show interfaces'))
+        if port_matches == []:
+            return None     # TODO: RE failed, switch not supported
+            
+        for match in port_matches:
+            port = dict()
+            port['name'], port['status'], port['description'] = match
+            
+            status_match = re.search(status_re, self.cmd('show interface ' + port['name'] + ' status'))
+            if status_match is None:
+                port['vlan'] = None
+                port['duplex'] = None
+                port['speed'] = None
+                port['media'] = None
+            else:
+                port['vlan'], port['duplex'], port['speed'], port['media'] = status_match.groups()[2:]
+            
+            
+            
         
