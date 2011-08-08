@@ -59,14 +59,14 @@ class Device(object):
                 idx, match, text = self._connection.expect(['assword:'], 5)
                 
                 if match is None:
-                    raise AuthenticationError("Unexpected text when trying to log in")
+                    raise AuthenticationError("Unexpected text when trying to enter password", text)
                 elif match.group().count('assword'):
                     self._connection.write(self.password + "\n")
                 
                 # Check for an valid login
                 idx, match, text = self._connection.expect(['>', "Login invalid"], 5)
                 if match is None:
-                    raise AuthenticationError("Unexpected text when trying to log in")
+                    raise AuthenticationError("Unexpected text post-login", text)
                 elif match.group().count("Login invalid"):
                     raise AuthenticationError("Unable to login. Your username or password are incorrect.")
         else:
@@ -166,14 +166,15 @@ class Device(object):
         # The RE string is a property for testing purposes
         get_model.re_text = '(?:cisco (.+?) \(.+\) processor)|(?:Model number\s*:\s+(.+))'
         
-        match = re.search(get_model.re_text, self.cmd('show version'))
+        cmd_output = self.cmd('show version')
+        match = re.search(get_model.re_text, cmd_output)
         
         if match is not None:
             version = match.group(1)
         else:
-            version = None  # TODO: Handle this more gracefully. 
-            # Maybe we should tell user that this switch isn't supported and 
-            # to contact the ciscolib developer...
+            version = None
+            raise ModelNotSupported(cmd_output)
+            
         
         return version
         
@@ -189,7 +190,7 @@ class Device(object):
         
    
     def get_interfaces(self):
-        detail_re = "((?:\w+|-|/!)+\d+(?:/\d+)?) is (?:up|down).+? \((.+)\)\r?\n(?:.+\r?\n)(?:\s+Description: (.+)\r?\n)?"
+        detail_re = "((?:\w+|-|/!)+\d+(?:/\d+)*) is (?:up|down).+? \((.+)\) \r?\n(?:.+\r?\n)(?:\s+Description: (.+)\r?\n)?"
         
         status_re = "(\w{2}\d+/\d+)\s+(?:.+)?\s+(\w+)\s+(\d+|trunk)\s+((?:\d|\w|-)+)\s+((?:\d|\w|-)+)\s+(.+)"
         
@@ -197,12 +198,14 @@ class Device(object):
         
         port_matches = re.findall(detail_re, self.cmd('show interfaces'))
         if port_matches == []:
-            return None     # TODO: RE failed, switch not supported
+            raise ModelNotSupported(self.cmd('show interfaces'))
+
             
         for match in port_matches:
             port = dict()
             port['name'], port['status'], port['description'] = match
             
+            # Not exactly the most efficient, but it guarantees that we get the right ports
             status_match = re.search(status_re, self.cmd('show interface ' + port['name'] + ' status'))
             if status_match is None:
                 port['vlan'] = None
@@ -211,6 +214,10 @@ class Device(object):
                 port['media'] = None
             else:
                 port['vlan'], port['duplex'], port['speed'], port['media'] = status_match.groups()[2:]
+                
+            ports.append(port)
+                
+        return ports
             
             
             

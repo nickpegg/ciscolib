@@ -6,7 +6,7 @@ class CiscoError(Exception):
     def __str__(self):
         ret = self.value
 
-        if self.text is None or self.text == '':
+        if self.text is not None and self.text != '':
             ret += "\nText returned from switch: " + str(self.text)
 
         return ret
@@ -29,3 +29,10 @@ class InvalidCommand(CiscoError):
         ret = "Invalid command: " + str(self.cmd)
         return ret
 
+class ModelNotSupported(CiscoError):
+    det __str__(self):
+        ret = "This model of switch is not supported by this version of CiscoLib\n"
+        ret += "Please contact the CiscoLib developer for help\n\n"
+        ret += "This information may be useful:\n" + self.value
+        
+        return ret
