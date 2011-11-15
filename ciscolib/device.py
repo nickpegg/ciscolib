@@ -145,7 +145,7 @@ class Device(object):
    
     def get_neighbors(self):
         """ Returns a list of dicts of the switch's neighbors: 
-            (hostname, ip, local_port, remote_port) """
+            {hostname, ip, local_port, remote_port} """
         
         re_text = "-+\r?\nDevice ID: (.+)\\b\r?\n.+\s+\r?\n\s*IP address:\s+(\d+\.\d+\.\d+\.\d+)\s*\r?\n.*\r?\nInterface: (.+),.+Port ID.+:(.+)\\b\r?\n"
         
@@ -186,13 +186,14 @@ class Device(object):
         
         Returned fields: name, description, status, vlan, duplex, speed, media
         """
+        #TODO: Implement this
         pass
         
    
     def get_interfaces(self):
         detail_re = "((?:\w+|-|/!)+\d+(?:/\d+)*) is (?:up|down).+? \((.+)\) \r?\n(?:.+\r?\n)(?:\s+Description: (.+)\r?\n)?"
         
-        status_re = "(\w{2}\d+/\d+)\s+(?:.+)?\s+(\w+)\s+(\d+|trunk)\s+((?:\d|\w|-)+)\s+((?:\d|\w|-)+)\s+(.+)"
+        status_re = "(\w{2}\d+(?:/\d+)+)\s+(.+?)\s+(\w+)\s+(\d+|trunk)\s+((?:\d|\w|-)+)\s+((?:\d|\w|-)+)\s+(.+)"
         
         ports = []
         

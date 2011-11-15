@@ -30,7 +30,7 @@ class InvalidCommand(CiscoError):
         return ret
 
 class ModelNotSupported(CiscoError):
-    det __str__(self):
+    def __str__(self):
         ret = "This model of switch is not supported by this version of CiscoLib\n"
         ret += "Please contact the CiscoLib developer for help\n\n"
         ret += "This information may be useful:\n" + self.value
