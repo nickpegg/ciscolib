@@ -48,7 +48,7 @@ class Device(object):
             self._connection.write(self.password + "\n")
             
             # Another password prompt means a bad password
-            idx, match, text = self._connection.expect(['assword', '>'], 5)
+            idx, match, text = self._connection.expect(['assword', '>', '#'], 5)
             if match.group() is not None and match.group().count('assword'):
                 raise AuthenticationError("Incorrect login password")            
         elif match.group().count('sername') > 0:
@@ -64,7 +64,7 @@ class Device(object):
                     self._connection.write(self.password + "\n")
                 
                 # Check for an valid login
-                idx, match, text = self._connection.expect(['>', "Login invalid"], 5)
+                idx, match, text = self._connection.expect(['#', '>', "Login invalid"], 2)
                 if match is None:
                     raise AuthenticationError("Unexpected text post-login", text)
                 elif match.group().count("Login invalid"):
@@ -75,7 +75,11 @@ class Device(object):
     
     def _get_hostname(self):
         self._connection.write("\n")
-        self.hostname = self._connection.read_until(">").replace('>','').strip()
+        
+        idx, match, text = self._connection.expect(['#', '>'], 2)
+        
+        if match is not None:
+            self.hostname = text.replace('>', '').replace('#', '').strip()
        
         
     def _get_truncated_hostname(self):
