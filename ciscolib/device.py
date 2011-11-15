@@ -92,10 +92,17 @@ class Device(object):
             self.enable_password = password
             
         self.write("enable\n")
-        self._connection.read_until("assword:", 5)
-        self.write(str(self.enable_password) + "\n")
         
-        idx, match, text = self._connection.expect(["#", 'assword:'], 5)
+        idx, match, text = self._connection.expect(['#', 'assword:'], 1)
+        if match is None:
+            raise CiscoError("I tried to enable, but didn't get a command nor a password prompt")
+        else:
+            if '#' in text:
+                return  # We're already enabled, dummy!
+            elif 'assword' in text:
+                self.write(str(self.enable_password) + "\n")
+        
+        idx, match, text = self._connection.expect(["#", 'assword:'], 1)
         
         if match.group() is None:
             raise CiscoError("Unexpected output when trying to enter enable mode", text=None)
