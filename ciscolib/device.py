@@ -17,11 +17,11 @@ class Device(object):
         self._connection = None
 
         
-    def connect(self, host=None, timeout=5):
+    def connect(self, host=None, port=23, timeout=5):
         if host is None:
             host = self.host
             
-        self._connection = telnetlib.Telnet(host, timeout=timeout)
+        self._connection = telnetlib.Telnet(host, port, timeout)
         self._authenticate()
         self._get_hostname()
         
