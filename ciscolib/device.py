@@ -225,7 +225,10 @@ class Device(object):
                 port['speed'] = None
                 port['media'] = None
             else:
-                port['vlan'], port['duplex'], port['speed'], port['media'] = status_match.groups()[2:]
+                port['vlan'], port['duplex'], port['speed'], port['media'] = status_match.groups()[3:]
+            
+            port['media'] = port['media'].strip()
+            port['description'] = port['description'].strip()
                 
             ports.append(port)
                 
