@@ -182,13 +182,20 @@ class Device(object):
     def get_model(self):
         """ Gets the model number of the switch using the `get version` command """
         
-        re_text = '(?:cisco (.+?) \(.+\) processor)|(?:Model number\s*:\s+(.+))'    
+        re_text = '(?:Model number\s*:\s+(.+))|(?:cisco (.+?) \(.+\) processor)'    
         
         cmd_output = self.cmd('show version')
         match = re.search(re_text, cmd_output)
         
         if match is not None:
-            model = match.group(1)
+            one, two = match.groups()
+            if two is None:
+                model = one.strip()
+            elif one is None:
+                model = two.strip()
+            else:
+                model = None
+                
         else:
             model = None
             raise ModelNotSupported(cmd_output)
