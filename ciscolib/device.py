@@ -152,6 +152,10 @@ class Device(object):
         for a in text.split('\n')[:-1]:
             ret_text += a + "\n"
             
+        # If someone changed the hostname, we need to update that
+        if 'hostname' in cmd_text:
+            self._get_hostname()
+            
         if "Invalid input" in ret_text or "Incomplete command" in ret_text:
             raise InvalidCommand(cmd_text)
         
