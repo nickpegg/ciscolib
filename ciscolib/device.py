@@ -182,18 +182,33 @@ class Device(object):
     def get_model(self):
         """ Gets the model number of the switch using the `get version` command """
         
-        # The RE string is a property for testing purposes
-        get_model.re_text = '(?:cisco (.+?) \(.+\) processor)|(?:Model number\s*:\s+(.+))'
+        re_text = '(?:cisco (.+?) \(.+\) processor)|(?:Model number\s*:\s+(.+))'    
         
         cmd_output = self.cmd('show version')
-        match = re.search(get_model.re_text, cmd_output)
+        match = re.search(re_text, cmd_output)
+        
+        if match is not None:
+            model = match.group(1)
+        else:
+            model = None
+            raise ModelNotSupported(cmd_output)
+            
+        
+        return model
+        
+    def get_ios_version(self):
+        """ Gets the IOS software version """
+        
+        needle = "IOS.*Software.*Version ([\w\.\(\)]+)"
+        haystack = self.cmd('show version')
+        
+        match = re.search(needle, haystack)
         
         if match is not None:
             version = match.group(1)
         else:
             version = None
             raise ModelNotSupported(cmd_output)
-            
         
         return version
         
