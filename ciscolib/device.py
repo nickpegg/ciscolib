@@ -15,6 +15,9 @@ class Device(object):
         
         self.connected = False
         self._connection = None
+        
+        if self.username == '':
+            self.username = None
 
         
     def connect(self, host=None, port=23, timeout=5):
@@ -131,6 +134,7 @@ class Device(object):
         else:
             expect_re = [thost + ".*" + prompt + "$"]
             
+        # TODO: Error instead of timing out
         idx, match, ret_text = self._connection.expect(expect_re, 5)
         
         return ret_text
