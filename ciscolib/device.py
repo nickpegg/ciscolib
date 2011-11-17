@@ -67,10 +67,10 @@ class Device(object):
                     self._connection.write(self.password + "\n")
                 
                 # Check for an valid login
-                idx, match, text = self._connection.expect(['#', '>', "Login invalid"], 2)
+                idx, match, text = self._connection.expect(['#', '>', "Login invalid", "Authentication failed"], 2)
                 if match is None:
                     raise AuthenticationError("Unexpected text post-login", text)
-                elif match.group().count("Login invalid"):
+                elif "invalid" in match.group() or "failed" in match.group():
                     raise AuthenticationError("Unable to login. Your username or password are incorrect.")
         else:
             raise AuthenticationError("Unable to get a login prompt")
