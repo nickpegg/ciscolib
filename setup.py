@@ -8,5 +8,15 @@ setup(name="ciscolib",
     author="Nick Pegg",
     author_email="nick@nickpegg.com",
     packages=['ciscolib'],
-    )
+    classifiers = [
+        "Programming Language :: Python",
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: OS Independent",
+        "Topic :: Terminals",
+        "Topic :: Terminals :: Telnet",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ]
+)
 

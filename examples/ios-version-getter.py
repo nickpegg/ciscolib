@@ -6,7 +6,7 @@ import ciscolib
 import csv
 import traceback
 
-infile = csv.DictReader(open("switches.csv"))
+infile = csv.DictReader(open("switches.csv"))   # Columns: ip, username, password
 outfile = csv.DictWriter(open("ios_versions.csv", 'w'), ["Hostname", "IP", "Model", "IOS Version"])
 
 outfile.writeheader()
