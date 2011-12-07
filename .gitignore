@@ -1,4 +1,5 @@
 MANIFEST
 *pyc
 build
+dist
 test.py
