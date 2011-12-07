@@ -1,2 +1,4 @@
 MANIFEST
 *pyc
+build
+test.py
