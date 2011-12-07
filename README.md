@@ -1,7 +1,7 @@
 # ciscolib
 
 A Python library for interacting with Cisco devices via command line. Only 
-telnet is suppoted at this time.
+telnet is supported at this time.
 
 There is a lack of documentation at the moment, but this library is fairly 
 simple. If you dig through device.py, it should be fairly self-explanatory. 
