@@ -1,3 +1,7 @@
+# This is unfortunately mostly unused at the moment. I would like to set up 
+# some sort of test framework which tests helper functions based on pre-fetched
+# switch output
+
 import unittest
 import telnetlib
 
