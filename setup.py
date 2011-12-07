@@ -1,9 +1,12 @@
 from distutils.core import setup
 
+import ciscolib
+
 setup(name="ciscolib",
-    version="0.1rc3",
-    description="Helps in creating and using Cisco terminal sessions",
+    version=ciscolib.__version__,
+    description="Interacts with Cisco devices via command line",
     author="Nick Pegg",
     author_email="nick@nickpegg.com",
     packages=['ciscolib'],
     )
+
