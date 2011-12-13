@@ -264,6 +264,27 @@ class Device(object):
                 
         return ports
             
-            
-            
+    def get_arp_table(self):
+        """ 
+        Returns the ARP table from the device as a list of dicts. 
+        Only retreives IP and ARPA addresses at the moment.
         
+        {ip, age, mac, interface}
+        """
+        re_text = 'Internet\s+(?P<ip>\d+\.\d+\.\d+\.\d+)\s+(\d+|-)\s+((?:\d|\w){4}\.(?:\d|\w){4}\.(?:\d|\w){4})\s+ARPA\s+(.+)\r?\n?'
+        
+        table = []
+        for item in re.findall(re_text, self.cmd("show arp")):
+            table.append({
+                "ip": item[0],
+                "age": item[1],
+                "mac": item[2],
+                "interface": item[3].strip()
+            })
+    
+        return table
+        
+        
+    def get_mac_table(self):
+        """ Returns the mac address table from the device """
+        pass    # TODO: Implement me!
