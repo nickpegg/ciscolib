@@ -30,9 +30,12 @@ class InvalidCommand(CiscoError):
         return ret
 
 class ModelNotSupported(CiscoError):
+    def __init__(self, reason):
+        self.value = value
+        self.reason = reason
     def __str__(self):
         ret = "This model of switch is not supported by this version of CiscoLib\n"
-        ret += "Please contact the CiscoLib developer for help\n\n"
-        ret += "This information may be useful:\n" + self.value
+        ret += "Please contact the CiscoLib developer for help.\n\n"
+        ret += "Reason: %s\n" % self.reason
         
         return ret
