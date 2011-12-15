@@ -267,7 +267,7 @@ class Device(object):
                 
         return ports
             
-    def get_arp_table(self, as_list=False):
+    def get_arp_table(self):
         """ 
         Returns the ARP table from the device as a list of dicts. 
         Only retreives IP and ARPA addresses at the moment.
