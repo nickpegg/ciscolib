@@ -83,6 +83,8 @@ class Device(object):
         
         if match is not None:
             self.hostname = text.replace('>', '').replace('#', '').strip()
+        else:
+            raise CiscoError("Unable to get device hostname")
        
         
     def _get_truncated_hostname(self):
@@ -166,7 +168,7 @@ class Device(object):
         """ Returns a list of dicts of the switch's neighbors: 
             {hostname, ip, local_port, remote_port} """
         
-        re_text = "-+\r?\nDevice ID: (.+)\\b\r?\n.+\s+\r?\n\s*IP address:\s+(\d+\.\d+\.\d+\.\d+)\s*\r?\n.*\r?\nInterface: (.+),.+Port ID.+:(.+)\\b\r?\n"
+        re_text = "-+\r?\nDevice ID: (.+)\\b\r?\n.+\s+\r?\n\s*IP address:\s+(\d+\.\d+\.\d+\.\d+)\s*\r?\n.*\r?\nInterface: (.+),.+Port ID.+: (.+)\\b\r?\n"
         
         neighbors = list()
         for neighbor in re.findall(re_text, self.cmd('show cdp neighbors detail')):
@@ -198,7 +200,7 @@ class Device(object):
                 
         else:
             model = None
-            raise ModelNotSupported(cmd_output)
+            raise ModelNotSupported("Unable to do `show version`", cmd_output)
             
         
         return model
@@ -215,7 +217,7 @@ class Device(object):
             version = match.group(1)
         else:
             version = None
-            raise ModelNotSupported(cmd_output)
+            raise ModelNotSupported("Unable to do `show version`", cmd_output)
         
         return version
         
@@ -238,9 +240,10 @@ class Device(object):
         
         ports = []
         
-        port_matches = re.findall(detail_re, self.cmd('show interfaces'))
+        interface_data = self.cmd('show interfaces')
+        port_matches = re.findall(detail_re, interface_data)
         if port_matches == []:
-            raise ModelNotSupported(self.cmd('show interfaces'))
+            raise ModelNotSupported("Unable to parse `show interfaces`", interface_data)
 
             
         for match in port_matches:
@@ -264,7 +267,7 @@ class Device(object):
                 
         return ports
             
-    def get_arp_table(self):
+    def get_arp_table(self, as_list=False):
         """ 
         Returns the ARP table from the device as a list of dicts. 
         Only retreives IP and ARPA addresses at the moment.
@@ -287,4 +290,16 @@ class Device(object):
         
     def get_mac_table(self):
         """ Returns the mac address table from the device """
-        pass    # TODO: Implement me!
+        re_text = '\*?\s+(\d+|All)\s+((?:\d|\w){4}\.(?:\d|\w){4}\.(?:\d|\w){4})\s+(static|dynamic)\s+(?:(?:Yes|No)\s+(?:-|\d+)\s+)?(.+?)\r?\n'
+        
+        try:
+            data = self.cmd("show mac address-table")
+        except:
+            try:
+                data = self.cmd("show mac-address-table")
+            except:
+                raise ModelNotSupported("No MAC address table command")
+                
+        rows = re.findall(re_text, data, flags=re.I)
+        
+        return rows
