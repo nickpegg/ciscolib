@@ -49,34 +49,13 @@ def main():
             continue
             
         
-        neighbors = switch.get_neighbors()
-        
-        switch.enable(ENABLE_PWD)
-        switch.cmd("conf terminal")
-        
-        # Iterate through the neighbors and set the port descriptions        
-        for neighbor in neighbors:
-            name = neighbor['hostname']
-            port = neighbor['local_port']
-            
-            # If there is a domain name in the hostname, get rid of it
-            if DOMAIN_NAME == '':
-                name = name.split('.', 1)[0]
-            else:
-                name = name.replace(DOMAIN_NAME, '')
-            
-            if "SEP" in name or "ap" in name or "AP" in name:
-                # Specific for my case. Feel free to remove this if statement.
-                print("\tFound an AP or Phone on port %s. Ignoring." % port)
-            else:
-                print("\tFound %s on %s" % (name, port))
-                switch.cmd("int %s" % port)
-                switch.cmd("desc %s%s%s" % (DESCRIPTION_PREFIX, name, DESCRIPTION_SUFFIX))
-                switch.cmd("exit")  # Get out of the interface config
-            
-            
+        print switch.get_neighbors()
+        print switch.get_model()
+        print switch.get_ios_version()
+        print switch.get_interfaces()
+
+         
         switch.cmd("exit")          # Get out of config mode
-        switch.cmd("write mem")     # Save it!
         switch.disconnect()
         print('')
         

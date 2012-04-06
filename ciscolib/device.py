@@ -2,7 +2,7 @@ import telnetlib
 import re
 import time
 
-from errors import *
+from .errors import *
 
 class Device(object):
     """ Connects to a Cisco device through telnet """
