@@ -2,7 +2,8 @@ import telnetlib
 import re
 import time
 
-from errors import *
+from .errors import *
+from .compat import *
 
 class Device(object):
     """ Connects to a Cisco device through telnet """
@@ -35,7 +36,7 @@ class Device(object):
         
     def disconnect(self):
         if self._connection is not None:
-            self._connection.write("exit\n")
+            self._connection.write(b"exit\n")
             self._connection.close()
             
         self._connection = None
@@ -43,43 +44,43 @@ class Device(object):
           
             
     def _authenticate(self):
-        idx, match, text = self._connection.expect(['sername:', 'assword:'], 5)
+        idx, match, text = self.expect(['sername:', 'assword:'], 5)
 
         if match is None:
             raise AuthenticationError("Unable to get a username or password prompt when trying to authenticate.", text)
-        elif match.group().count('assword:'):
-            self._connection.write(self.password + "\n")
+        elif match.group().count(b'assword:'):
+            self.write(self.password + "\n")
             
             # Another password prompt means a bad password
-            idx, match, text = self._connection.expect(['assword', '>', '#'], 5)
-            if match.group() is not None and match.group().count('assword'):
+            idx, match, text = self.expect(['assword', '>', '#'], 5)
+            if match.group() is not None and match.group().count(b'assword'):
                 raise AuthenticationError("Incorrect login password")            
-        elif match.group().count('sername') > 0:
+        elif match.group().count(b'sername') > 0:
             if self.username is None:
                 raise AuthenticationError("A username is required but none is supplied.")
             else:
-                self._connection.write(self.username + "\n")
-                idx, match, text = self._connection.expect(['assword:'], 5)
+                self.write(self.username + "\n")
+                idx, match, text = self.expect(['assword:'], 5)
                 
                 if match is None:
                     raise AuthenticationError("Unexpected text when trying to enter password", text)
-                elif match.group().count('assword'):
-                    self._connection.write(self.password + "\n")
+                elif match.group().count(b'assword'):
+                    self.write(self.password + "\n")
                 
                 # Check for an valid login
-                idx, match, text = self._connection.expect(['#', '>', "Login invalid", "Authentication failed"], 2)
+                idx, match, text = self.expect(['#', '>', "Login invalid", "Authentication failed"], 2)
                 if match is None:
                     raise AuthenticationError("Unexpected text post-login", text)
-                elif "invalid" in match.group() or "failed" in match.group():
+                elif b"invalid" in match.group() or b"failed" in match.group():
                     raise AuthenticationError("Unable to login. Your username or password are incorrect.")
         else:
             raise AuthenticationError("Unable to get a login prompt")
 
     
     def _get_hostname(self):
-        self._connection.write("\n")
+        self.write("\n")
         
-        idx, match, text = self._connection.expect(['#', '>'], 2)
+        idx, match, text = self.expect(['#', '>'], 2)
         
         if match is not None:
             self.hostname = text.replace('>', '').replace('#', '').strip()
@@ -98,26 +99,30 @@ class Device(object):
             
         self.write("enable\n")
         
-        idx, match, text = self._connection.expect(['#', 'assword:'], 1)
+        idx, match, text = self.expect(['#', 'assword:'], 1)
         if match is None:
             raise CiscoError("I tried to enable, but didn't get a command nor a password prompt")
         else:
             if '#' in text:
                 return  # We're already enabled, dummy!
             elif 'assword' in text:
-                self.write(str(self.enable_password) + "\n")
+                self.write(self.enable_password + "\n")
         
-        idx, match, text = self._connection.expect(["#", 'assword:'], 1)
+        idx, match, text = self.expect(["#", 'assword:'], 1)
         
         if match.group() is None:
             raise CiscoError("Unexpected output when trying to enter enable mode", text=None)
-        elif match.group().count('assword') > 0:
-            self._connection.write("\n\n\n")    # Get back to the prompt
+        elif match.group().count(b'assword') > 0:
+            self.write("\n\n\n")    # Get back to the prompt
             raise CiscoError("Incorrect enable password")
-        elif not match.group().count("#"):
+        elif not match.group().count(b"#"):
             raise CiscoError("Unexpected output when trying to enter enable mode", text=match.group())
         
-            
+    def expect(self, asearch, ind):
+        
+        idx, match, text = self._connection.expect([needle.encode('ascii') for needle in asearch], ind)
+        return idx, match, s(text)
+
     def write(self, text):
         """ Do a raw write on the telnet connection. No newline implied. """
         
@@ -125,7 +130,7 @@ class Device(object):
             self.connect()
             raise CiscoError("Not connected")
             
-        self._connection.write(text)
+        self._connection.write(text.encode('ascii'))
         
         
     def read_until_prompt(self, prompt=None, timeout=5):
@@ -137,7 +142,7 @@ class Device(object):
             expect_re = [thost + ".*" + prompt + "$"]
             
         # TODO: Error instead of timing out
-        idx, match, ret_text = self._connection.expect(expect_re, 10)
+        idx, match, ret_text = self.expect(expect_re, 10)
         
         return ret_text
     

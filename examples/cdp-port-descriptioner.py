@@ -6,7 +6,7 @@
 from getpass import getpass
 
 import ciscolib
-
+from ciscolib.compat import *
 
 def main():
     # These variables can be assigned in-code, or will be asked at runtime
@@ -22,7 +22,7 @@ def main():
     
     # Get credentials if they aren't already supplied
     if USERNAME is None or USERNAME == '':
-        USERNAME = raw_input("What is your switch username (blank for none)? ")
+        USERNAME = input("What is your switch username (blank for none)? ")
     if PASSWORD is None or PASSWORD == '':
         PASSWORD = getpass("What is your switch password? ")
     if ENABLE_PWD is None or ENABLE_PWD == '':
