@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Runs through a list of switches and if there is a neighbor on a given port,
 # set the port's description to that neighbor's name
@@ -6,6 +6,7 @@
 from getpass import getpass
 
 import ciscolib
+
 
 def main():
     # These variables can be assigned in-code, or will be asked at runtime
@@ -21,7 +22,7 @@ def main():
     
     # Get credentials if they aren't already supplied
     if USERNAME is None or USERNAME == '':
-        USERNAME = input("What is your switch username (blank for none)? ")
+        USERNAME = raw_input("What is your switch username (blank for none)? ")
     if PASSWORD is None or PASSWORD == '':
         PASSWORD = getpass("What is your switch password? ")
     if ENABLE_PWD is None or ENABLE_PWD == '':
@@ -37,17 +38,45 @@ def main():
         else:
             switch = ciscolib.Device(ip, PASSWORD, enable_password=ENABLE_PWD)
             
-        switch.connect()
-        print("Logged into %s" % ip)
+        try:
+            switch.connect()
+            print("Logged into %s" % ip)
+        except ciscolib.AuthenticationError as e:
+            print("Couldn't connect to %s: %s" % (ip, e.value))
+            continue
+        except Exception as e:
+            print("Couldn't connect to %s: %s" % (ip, str(e)))
+            continue
             
         
-        print(switch.get_neighbors())
-        print(switch.get_model())
-        print(switch.get_ios_version())
-        print(switch.get_interfaces())
-
-         
+        neighbors = switch.get_neighbors()
+        
+        switch.enable(ENABLE_PWD)
+        switch.cmd("conf terminal")
+        
+        # Iterate through the neighbors and set the port descriptions        
+        for neighbor in neighbors:
+            name = neighbor['hostname']
+            port = neighbor['local_port']
+            
+            # If there is a domain name in the hostname, get rid of it
+            if DOMAIN_NAME == '':
+                name = name.split('.', 1)[0]
+            else:
+                name = name.replace(DOMAIN_NAME, '')
+            
+            if "SEP" in name or "ap" in name or "AP" in name:
+                # Specific for my case. Feel free to remove this if statement.
+                print("\tFound an AP or Phone on port %s. Ignoring." % port)
+            else:
+                print("\tFound %s on %s" % (name, port))
+                switch.cmd("int %s" % port)
+                switch.cmd("desc %s%s%s" % (DESCRIPTION_PREFIX, name, DESCRIPTION_SUFFIX))
+                switch.cmd("exit")  # Get out of the interface config
+            
+            
         switch.cmd("exit")          # Get out of config mode
+        switch.cmd("write mem")     # Save it!
         switch.disconnect()
         print('')
         
