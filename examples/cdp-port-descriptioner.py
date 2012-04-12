@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Runs through a list of switches and if there is a neighbor on a given port,
 # set the port's description to that neighbor's name
@@ -6,7 +6,6 @@
 from getpass import getpass
 
 import ciscolib
-
 
 def main():
     # These variables can be assigned in-code, or will be asked at runtime
@@ -22,7 +21,7 @@ def main():
     
     # Get credentials if they aren't already supplied
     if USERNAME is None or USERNAME == '':
-        USERNAME = raw_input("What is your switch username (blank for none)? ")
+        USERNAME = input("What is your switch username (blank for none)? ")
     if PASSWORD is None or PASSWORD == '':
         PASSWORD = getpass("What is your switch password? ")
     if ENABLE_PWD is None or ENABLE_PWD == '':
@@ -38,21 +37,14 @@ def main():
         else:
             switch = ciscolib.Device(ip, PASSWORD, enable_password=ENABLE_PWD)
             
-        try:
-            switch.connect()
-            print("Logged into %s" % ip)
-        except ciscolib.AuthenticationError as e:
-            print("Couldn't connect to %s: %s" % (ip, e.value))
-            continue
-        except Exception as e:
-            print("Couldn't connect to %s: %s" % (ip, str(e)))
-            continue
+        switch.connect()
+        print("Logged into %s" % ip)
             
         
-        print switch.get_neighbors()
-        print switch.get_model()
-        print switch.get_ios_version()
-        print switch.get_interfaces()
+        print(switch.get_neighbors())
+        print(switch.get_model())
+        print(switch.get_ios_version())
+        print(switch.get_interfaces())
 
          
         switch.cmd("exit")          # Get out of config mode
