@@ -239,7 +239,7 @@ class Device(object):
         
    
     def get_interfaces(self):
-        detail_re = "((?:\w+|-|/!)+\d+(?:/\d+)*) is (?:up|down).+? \((.+)\)\s?\r?\n(?:.+\r?\n)(?:\s+Description: (.+)\r?\n)?"
+        detail_re = "((?:\w+|-|/!)+\d+(?:/\d+)*) is (?:up|(?:administratively )?down).+? \((.+)\)\s?\r?\n(?:.+\r?\n)(?:\s+Description: (.+)\r?\n)?"
         
         status_re = "(\w{2}\d+(?:/\d+)+)\s+(.+?)\s+(\w+)\s+(\d+|trunk)\s+((?:\d|\w|-)+)\s+((?:\d|\w|-)+)\s+(.+)"
         
