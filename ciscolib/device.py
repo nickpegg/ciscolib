@@ -93,11 +93,16 @@ class Device(object):
         return self.hostname[:15]
         
     
-    def enable(self, password=None):
+    def enable(self, password=None, level=-1):
         if password is not None:
             self.enable_password = password
-            
-        self.write("enable\n")
+
+        if level < 0:
+            self.write("enable\n")
+        elif level > 15:
+            raise CiscoError("Enable level %s is out of the permitted range (0-15)" % (level))
+        else:
+            self.write("enable %s\n" % (level))
         
         idx, match, text = self.expect(['#', 'assword:'], 1)
         if match is None:
